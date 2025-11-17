@@ -166,7 +166,7 @@ export const TowerViewport = () => {
           ease: 'easeInOut',
         }}
         style={{
-          backgroundImage: 'url(/wizard-builds-towers/bg.jpg)',
+          backgroundImage: 'url(/bg.jpg)',
           backgroundSize: 'auto 100vh',
           backgroundPosition: 'center bottom',
           backgroundRepeat: 'repeat',
