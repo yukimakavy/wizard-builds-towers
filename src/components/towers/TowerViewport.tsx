@@ -175,9 +175,9 @@ export const TowerViewport = () => {
       {/* Visible container extending to top of page */}
       <div className="flex-1 flex flex-col justify-end items-center w-full relative z-10">
         <div
-          className="relative border-4 border-slate-700 flex flex-col"
+          className="relative flex flex-col"
           style={{
-            width: viewportWidth + 8,
+            width: viewportWidth,
             height: '100%',
             maxHeight: '90vh',
             backgroundColor: 'transparent',
@@ -187,7 +187,7 @@ export const TowerViewport = () => {
           <TowerStats />
           {/* Inner viewport - shows 3 rows plus 2 rows above for formation */}
           <div
-            className="absolute bottom-0 left-1 right-1 overflow-hidden"
+            className="absolute bottom-0 left-0 right-0 overflow-hidden"
             style={{
               height: extendedViewportHeight,
             }}
