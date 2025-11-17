@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useGameStore } from '../../state/towerStore';
 import { TOWER_CONSTANTS } from '../../config/uiConstants';
 import { Brick } from './Brick';
@@ -28,6 +28,9 @@ export const TowerViewport = () => {
   // Track which rows have already triggered a camera pan to prevent double-panning
   const pannedRowsRef = useRef<Set<number>>(new Set());
 
+  // Track viewport scale for responsive design
+  const [scale, setScale] = useState(1);
+
   // Auto-start building when component mounts
   useEffect(() => {
     if (!isBuilding && bricks.length === 0) {
@@ -41,6 +44,20 @@ export const TowerViewport = () => {
       pannedRowsRef.current.clear();
     }
   }, [bricks.length]);
+
+  // Handle responsive scaling
+  useEffect(() => {
+    const handleResize = () => {
+      const fullWidth = viewportWidth + 8;
+      const availableWidth = window.innerWidth - 16; // Account for padding
+      const newScale = Math.min(1, availableWidth / fullWidth);
+      setScale(newScale);
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [viewportWidth]);
 
   // Main building loop
   useEffect(() => {
@@ -151,7 +168,7 @@ export const TowerViewport = () => {
   const extendedViewportHeight = viewportHeight + 2 * (TOWER_CONSTANTS.brickHeight + TOWER_CONSTANTS.brickGap);
 
   return (
-    <div className="flex flex-col items-center h-full w-full">
+    <div className="flex flex-col items-center h-full w-full px-2">
       {/* Visible container extending to top of page */}
       <div className="flex-1 flex flex-col justify-end items-center w-full">
         <div
@@ -160,6 +177,8 @@ export const TowerViewport = () => {
             width: viewportWidth + 8,
             height: '100%',
             maxHeight: '90vh',
+            transform: `scale(${scale})`,
+            transformOrigin: 'bottom center',
           }}
         >
           {/* Tower Stats display at top of container */}
