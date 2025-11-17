@@ -5,6 +5,7 @@ import { TOWER_CONSTANTS } from '../../config/uiConstants';
 import { Brick } from './Brick';
 import { TowerStats } from './TowerStats';
 import { RowCompletionIndicator } from './RowCompletionIndicator';
+import bgImage from '/bg.jpg';
 
 export const TowerViewport = () => {
   const {
@@ -165,7 +166,7 @@ export const TowerViewport = () => {
           ease: 'easeInOut',
         }}
         style={{
-          backgroundImage: 'url(/bg.jpg)',
+          backgroundImage: `url(${bgImage})`,
           backgroundSize: 'auto 100vh',
           backgroundPosition: 'center bottom',
           backgroundRepeat: 'repeat',
