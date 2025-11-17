@@ -3,7 +3,6 @@ import { useEffect, useRef } from 'react';
 import { useGameStore } from '../../state/towerStore';
 import { TOWER_CONSTANTS } from '../../config/uiConstants';
 import { Brick } from './Brick';
-import { RowComboDisplay } from './RowComboDisplay';
 import { TowerStats } from './TowerStats';
 import { RowCompletionIndicator } from './RowCompletionIndicator';
 
