@@ -34,7 +34,7 @@ function App() {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-slate-100">
+    <div className="h-screen flex flex-col bg-slate-900">
       <TopBar />
       <main className="flex-1 overflow-y-auto">{renderMainContent()}</main>
       <BottomTabs />

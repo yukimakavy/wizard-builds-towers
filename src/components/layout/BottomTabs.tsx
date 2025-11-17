@@ -15,7 +15,7 @@ export const BottomTabs = () => {
   const setActiveTab = useGameStore((state) => state.setActiveTab);
 
   return (
-    <div className="bg-slate-800 border-t border-slate-700 px-2 py-2">
+    <div className="bg-slate-800 border-t border-slate-700 px-2 py-2 relative z-20">
       <div className="flex justify-around items-center max-w-2xl mx-auto">
         {tabs.map((tab) => (
           <button

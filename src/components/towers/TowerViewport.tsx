@@ -154,15 +154,34 @@ export const TowerViewport = () => {
   const extendedViewportHeight = viewportHeight + 2 * (TOWER_CONSTANTS.brickHeight + TOWER_CONSTANTS.brickGap) * brickScale;
 
   return (
-    <div className="flex flex-col items-center h-full w-full">
+    <div className="flex flex-col items-center h-full w-full relative">
+      {/* Animated background that scrolls with camera - full page width with parallax */}
+      <motion.div
+        className="fixed inset-0 pointer-events-none"
+        animate={{
+          backgroundPositionY: `${(cameraOffset * brickScale) / 3}px`,
+        }}
+        transition={{
+          duration: TOWER_CONSTANTS.cameraPanDuration / 1000,
+          ease: 'easeInOut',
+        }}
+        style={{
+          backgroundImage: 'url(/wizard-builds-towers/bg.jpg)',
+          backgroundSize: 'auto 100vh',
+          backgroundPosition: 'center bottom',
+          backgroundRepeat: 'repeat',
+          zIndex: 0,
+        }}
+      />
       {/* Visible container extending to top of page */}
-      <div className="flex-1 flex flex-col justify-end items-center w-full">
+      <div className="flex-1 flex flex-col justify-end items-center w-full relative z-10">
         <div
-          className="relative border-4 border-slate-700 bg-slate-100/50 flex flex-col"
+          className="relative border-4 border-slate-700 flex flex-col"
           style={{
             width: viewportWidth + 8,
             height: '100%',
             maxHeight: '90vh',
+            backgroundColor: 'transparent',
           }}
         >
           {/* Tower Stats display at top of container */}
