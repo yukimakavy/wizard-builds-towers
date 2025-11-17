@@ -10,6 +10,7 @@ interface BrickProps {
   state: BrickState;
   speedMultiplier: number;
   cameraOffset: number;
+  brickScale: number;
   onFormationComplete: () => void;
   onDropComplete: () => void;
 }
@@ -20,6 +21,7 @@ export const Brick = ({
   state,
   speedMultiplier,
   cameraOffset,
+  brickScale,
   onFormationComplete,
   onDropComplete,
 }: BrickProps) => {
@@ -49,12 +51,12 @@ export const Brick = ({
   }, [state, speedMultiplier, onFormationComplete]);
 
   // Calculate which row is at the bottom of the viewport based on camera offset
-  const rowHeight = TOWER_CONSTANTS.brickHeight + TOWER_CONSTANTS.brickGap;
-  const visibleBottomRow = Math.round(cameraOffset / rowHeight);
+  const unscaledRowHeight = TOWER_CONSTANTS.brickHeight + TOWER_CONSTANTS.brickGap;
+  const visibleBottomRow = Math.round(cameraOffset / unscaledRowHeight);
 
   // Always form at the 5th row position in the viewport (4 rows above visible bottom)
   const formationRowIndex = visibleBottomRow + 4;
-  const dropDistance = (formationRowIndex - rowIndex) * rowHeight;
+  const dropDistance = (formationRowIndex - rowIndex) * unscaledRowHeight * brickScale;
 
   // Colors for visual variety
   const brickColors = [
@@ -71,10 +73,10 @@ export const Brick = ({
     <div
       className="absolute"
       style={{
-        width: TOWER_CONSTANTS.brickWidth,
-        height: TOWER_CONSTANTS.brickHeight,
-        left: brickIndex * (TOWER_CONSTANTS.brickWidth + TOWER_CONSTANTS.brickGap),
-        bottom: rowIndex * (TOWER_CONSTANTS.brickHeight + TOWER_CONSTANTS.brickGap),
+        width: TOWER_CONSTANTS.brickWidth * brickScale,
+        height: TOWER_CONSTANTS.brickHeight * brickScale,
+        left: brickIndex * (TOWER_CONSTANTS.brickWidth + TOWER_CONSTANTS.brickGap) * brickScale,
+        bottom: rowIndex * (TOWER_CONSTANTS.brickHeight + TOWER_CONSTANTS.brickGap) * brickScale,
       }}
     >
       {/* Forming state: pixel-by-pixel reveal */}
@@ -102,7 +104,7 @@ export const Brick = ({
           animate={{ y: 0 }}
           transition={{
             duration: TOWER_CONSTANTS.brickDropDuration / 1000,
-            ease: [0.34, 1.56, 0.64, 1],
+            ease: 'easeOut',
           }}
           onAnimationComplete={onDropComplete}
         />

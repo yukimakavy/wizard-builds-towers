@@ -156,16 +156,19 @@ export const TowerViewport = () => {
     advanceToNextBrick();
   };
 
-  const viewportWidth =
-    TOWER_CONSTANTS.bricksPerRow * TOWER_CONSTANTS.brickWidth +
-    (TOWER_CONSTANTS.bricksPerRow - 1) * TOWER_CONSTANTS.brickGap;
+  // Calculate scale factor for mobile - scale brick dimensions, not the container
+  const maxAvailableWidth = typeof window !== 'undefined' ? window.innerWidth - 16 : 99999;
+  const idealWidth = TOWER_CONSTANTS.bricksPerRow * TOWER_CONSTANTS.brickWidth +
+                     (TOWER_CONSTANTS.bricksPerRow - 1) * TOWER_CONSTANTS.brickGap;
+  const brickScale = Math.min(1, maxAvailableWidth / (idealWidth + 8));
 
+  const viewportWidth = idealWidth * brickScale;
   const viewportHeight =
-    TOWER_CONSTANTS.visibleRows * TOWER_CONSTANTS.brickHeight +
-    (TOWER_CONSTANTS.visibleRows - 1) * TOWER_CONSTANTS.brickGap;
+    (TOWER_CONSTANTS.visibleRows * TOWER_CONSTANTS.brickHeight +
+    (TOWER_CONSTANTS.visibleRows - 1) * TOWER_CONSTANTS.brickGap) * brickScale;
 
   // Extended viewport to show formation happening 2 rows above
-  const extendedViewportHeight = viewportHeight + 2 * (TOWER_CONSTANTS.brickHeight + TOWER_CONSTANTS.brickGap);
+  const extendedViewportHeight = viewportHeight + 2 * (TOWER_CONSTANTS.brickHeight + TOWER_CONSTANTS.brickGap) * brickScale;
 
   return (
     <div className="flex flex-col items-center h-full w-full px-2">
@@ -185,9 +188,8 @@ export const TowerViewport = () => {
           <TowerStats />
           {/* Inner viewport - shows 3 rows plus 2 rows above for formation */}
           <div
-            className="absolute bottom-0 left-1 overflow-hidden"
+            className="absolute bottom-0 left-1 right-1 overflow-hidden"
             style={{
-              width: viewportWidth,
               height: extendedViewportHeight,
             }}
           >
@@ -195,7 +197,7 @@ export const TowerViewport = () => {
             <motion.div
               className="absolute bottom-0 left-0"
               animate={{
-                y: cameraOffset,
+                y: cameraOffset * brickScale,
               }}
               transition={{
                 duration: TOWER_CONSTANTS.cameraPanDuration / 1000,
@@ -216,17 +218,9 @@ export const TowerViewport = () => {
                   state={brick.state}
                   speedMultiplier={speedMultiplier}
                   cameraOffset={cameraOffset}
+                  brickScale={brickScale}
                   onFormationComplete={() => handleFormationComplete(brick.id)}
                   onDropComplete={() => handleDropComplete(brick.id)}
-                />
-              ))}
-
-              {/* Render combo multipliers for each row */}
-              {rowCombos.map((combo) => (
-                <RowComboDisplay
-                  key={`combo-${combo.rowIndex}`}
-                  rowIndex={combo.rowIndex}
-                  multiplier={combo.multiplier}
                 />
               ))}
 
@@ -244,6 +238,7 @@ export const TowerViewport = () => {
                     key={`completion-${combo.rowIndex}`}
                     rowIndex={combo.rowIndex}
                     multiplier={combo.multiplier}
+                    brickScale={brickScale}
                   />
                 );
               })}
