@@ -8,6 +8,8 @@ interface BrickProps {
   rowIndex: number;
   brickIndex: number;
   state: BrickState;
+  speedMultiplier: number;
+  cameraOffset: number;
   onFormationComplete: () => void;
   onDropComplete: () => void;
 }
@@ -16,16 +18,18 @@ export const Brick = ({
   rowIndex,
   brickIndex,
   state,
+  speedMultiplier,
+  cameraOffset,
   onFormationComplete,
   onDropComplete,
 }: BrickProps) => {
   const [formationProgress, setFormationProgress] = useState(0);
 
-  // Pixel-by-pixel formation animation
+  // Pixel-by-pixel formation animation (with speed multiplier)
   useEffect(() => {
     if (state === 'forming') {
       const startTime = Date.now();
-      const duration = TOWER_CONSTANTS.pixelFormationDuration;
+      const duration = TOWER_CONSTANTS.pixelFormationDuration * speedMultiplier;
 
       const animate = () => {
         const elapsed = Date.now() - startTime;
@@ -42,9 +46,15 @@ export const Brick = ({
 
       requestAnimationFrame(animate);
     }
-  }, [state, onFormationComplete]);
+  }, [state, speedMultiplier, onFormationComplete]);
 
-  const dropDistance = TOWER_CONSTANTS.brickHeight + 20;
+  // Calculate which row is at the bottom of the viewport based on camera offset
+  const rowHeight = TOWER_CONSTANTS.brickHeight + TOWER_CONSTANTS.brickGap;
+  const visibleBottomRow = Math.round(cameraOffset / rowHeight);
+
+  // Always form at the 5th row position in the viewport (4 rows above visible bottom)
+  const formationRowIndex = visibleBottomRow + 4;
+  const dropDistance = (formationRowIndex - rowIndex) * rowHeight;
 
   // Colors for visual variety
   const brickColors = [
@@ -80,7 +90,7 @@ export const Brick = ({
         />
       )}
 
-      {/* Dropping state: animated fall */}
+      {/* Dropping state: animated fall (constant speed) */}
       {state === 'dropping' && (
         <motion.div
           className={`${brickColor} border-2 border-amber-900 rounded-sm`}

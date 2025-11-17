@@ -14,8 +14,8 @@ export const TOWER_CONSTANTS = {
   brickGap: 4,
 
   // Animation timings (ms)
-  pixelFormationDuration: 50,
-  brickDropDuration: 50,
+  pixelFormationDuration: 200,
+  brickDropDuration: 100,
   cameraPanDuration: 300,
   delayBetweenBricks: 75,
 };

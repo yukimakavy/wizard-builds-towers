@@ -28,6 +28,7 @@ export interface TowerState {
   cameraOffset: number;
   towerHeight: number;
   totalBricksPlaced: number;
+  speedMultiplier: number; // Compounds by 2% per brick (starts at 1.0)
 }
 
 export interface UIState {
@@ -61,6 +62,7 @@ export const useGameStore = create<GameStore>((set) => ({
   cameraOffset: 0,
   towerHeight: 0,
   totalBricksPlaced: 0,
+  speedMultiplier: 1.0,
 
   // UI state
   activeTab: 'tower',
@@ -83,9 +85,15 @@ export const useGameStore = create<GameStore>((set) => ({
       // Count placed bricks
       const placedCount = updatedBricks.filter((b) => b.state === 'placed').length;
 
+      // Increase speed by 2% per brick placed (compounding)
+      const newSpeedMultiplier = newState === 'placed' && placedCount > state.totalBricksPlaced
+        ? state.speedMultiplier * 1.02
+        : state.speedMultiplier;
+
       return {
         bricks: updatedBricks,
         totalBricksPlaced: placedCount,
+        speedMultiplier: newSpeedMultiplier,
       };
     }),
 
@@ -145,6 +153,7 @@ export const useGameStore = create<GameStore>((set) => ({
         cameraOffset: 0,
         towerHeight: 0,
         totalBricksPlaced: 0,
+        speedMultiplier: 1.0,
         gold: state.gold + towerValue,
       };
     }),

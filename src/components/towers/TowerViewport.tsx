@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useGameStore } from '../../state/towerStore';
 import { TOWER_CONSTANTS } from '../../config/uiConstants';
 import { Brick } from './Brick';
@@ -16,6 +16,7 @@ export const TowerViewport = () => {
     totalRowsBuilt,
     cameraOffset,
     isBuilding,
+    speedMultiplier,
     addBrick,
     updateBrickState,
     advanceToNextBrick,
@@ -24,12 +25,22 @@ export const TowerViewport = () => {
     generateRowCombo,
   } = useGameStore();
 
+  // Track which rows have already triggered a camera pan to prevent double-panning
+  const pannedRowsRef = useRef<Set<number>>(new Set());
+
   // Auto-start building when component mounts
   useEffect(() => {
     if (!isBuilding && bricks.length === 0) {
       startBuilding();
     }
   }, [isBuilding, bricks.length, startBuilding]);
+
+  // Reset panned rows tracker when tower is sold
+  useEffect(() => {
+    if (bricks.length === 0) {
+      pannedRowsRef.current.clear();
+    }
+  }, [bricks.length]);
 
   // Main building loop
   useEffect(() => {
@@ -64,7 +75,7 @@ export const TowerViewport = () => {
       }
     }
 
-    // Add new brick in forming state
+    // Add new brick in forming state (delay stays constant)
     const timer = setTimeout(() => {
       addBrick({
         id: brickId,
@@ -75,7 +86,7 @@ export const TowerViewport = () => {
     }, TOWER_CONSTANTS.delayBetweenBricks);
 
     return () => clearTimeout(timer);
-  }, [isBuilding, currentRowIndex, currentBrickIndex, bricks, addBrick, totalRowsBuilt]);
+  }, [isBuilding, currentRowIndex, currentBrickIndex, bricks, addBrick, totalRowsBuilt, speedMultiplier]);
 
   // Handle tower shift down after completing each row once we have 3 rows
   useEffect(() => {
@@ -83,6 +94,12 @@ export const TowerViewport = () => {
     if (currentBrickIndex === 0 && currentRowIndex > 0 && totalRowsBuilt >= TOWER_CONSTANTS.visibleRows) {
       // The previous row just completed
       const justCompletedRowIndex = currentRowIndex - 1;
+
+      // Check if we've already panned for this row
+      if (pannedRowsRef.current.has(justCompletedRowIndex)) {
+        return;
+      }
+
       const completedRowBricks = bricks.filter((b) => b.rowIndex === justCompletedRowIndex);
 
       // Check if all bricks in that row are placed
@@ -90,6 +107,9 @@ export const TowerViewport = () => {
         completedRowBricks.length === TOWER_CONSTANTS.bricksPerRow &&
         completedRowBricks.every((b) => b.state === 'placed')
       ) {
+        // Mark this row as panned
+        pannedRowsRef.current.add(justCompletedRowIndex);
+
         // Shift the tower down by one row
         const timer = setTimeout(() => {
           panCameraUp();
@@ -127,6 +147,9 @@ export const TowerViewport = () => {
     TOWER_CONSTANTS.visibleRows * TOWER_CONSTANTS.brickHeight +
     (TOWER_CONSTANTS.visibleRows - 1) * TOWER_CONSTANTS.brickGap;
 
+  // Extended viewport to show formation happening 2 rows above
+  const extendedViewportHeight = viewportHeight + 2 * (TOWER_CONSTANTS.brickHeight + TOWER_CONSTANTS.brickGap);
+
   return (
     <div className="flex flex-col items-center h-full w-full">
       {/* Visible container extending to top of page */}
@@ -141,12 +164,12 @@ export const TowerViewport = () => {
         >
           {/* Tower Stats display at top of container */}
           <TowerStats />
-          {/* Inner viewport - clips to exactly 3 rows at bottom */}
+          {/* Inner viewport - shows 3 rows plus 2 rows above for formation */}
           <div
             className="absolute bottom-0 left-1 overflow-hidden"
             style={{
               width: viewportWidth,
-              height: viewportHeight,
+              height: extendedViewportHeight,
             }}
           >
             {/* Animated container that shifts down */}
@@ -172,6 +195,8 @@ export const TowerViewport = () => {
                   rowIndex={brick.rowIndex}
                   brickIndex={brick.brickIndex}
                   state={brick.state}
+                  speedMultiplier={speedMultiplier}
+                  cameraOffset={cameraOffset}
                   onFormationComplete={() => handleFormationComplete(brick.id)}
                   onDropComplete={() => handleDropComplete(brick.id)}
                 />
